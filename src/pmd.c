@@ -335,7 +335,8 @@ int main(int ac, char **av)
 	printf("The throughput (with memory allocation) is:\t %f MB/s\n", throughputAll);
 	printf("The throughput (without memory allocation) is:\t %f MB/s\n", throughput);
 #endif
-/*
+
+#ifndef NOFILEWRITE
 	// write the output file
 	for(i=0; i<outputNum; i++) {
 		FILE * wFile;
@@ -349,7 +350,8 @@ int main(int ac, char **av)
 		// remember to close the file
 		fclose(wFile);
 	}
-*/
+#endif
+
 	// free the ibuff and obuff
 	for(i=0; i<outputNum; i++) {
 		free(ibuff[i]);
