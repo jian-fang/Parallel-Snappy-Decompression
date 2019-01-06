@@ -22,7 +22,7 @@
 #endif
 
 #ifndef MAX_THREAD_NUM
-#define MAX_THREAD_NUM 128
+#define MAX_THREAD_NUM 256
 #endif
 
 #ifndef TIMINGINFO
@@ -73,7 +73,41 @@ struct queue_t {
 
 //------------------------------- For Mapping The CPUs  --------------------// 
 //static const int mapping[40]={0,1,2,3,4,5,6,7,8,9,20,21,22,23,24,25,26,27,28,29,10,11,12,13,14,15,16,17,18,19,30,31,32,33,34,35,36,37,38,39};
-static const int mapping[40]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39};
+//static const int mapping[40]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39};
+static int mapping[MAX_THREAD_NUM]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39};
+
+int setMapping(int * map) {
+    int i=0;
+    int num_cores;
+
+    // open file "mapping.txt" for reading the mapping rules
+    FILE * rFile = fopen("mapping.txt","r");
+	if (rFile == NULL) {
+		printf("File open error: mapping.txt!\n");
+        return 0;
+	}
+    else {
+        // read the first int in "mapping.txt" that states the number of cores
+        if (fscanf(rFile, "%d", &num_cores) <= 0) {
+            printf("File Reading Error: cannot parser the number of setting cores");
+            return 0;
+        }
+        else {
+            if (num_cores > MAX_THREAD_NUM) {
+                num_cores = MAX_THREAD_NUM;
+            }
+            for(i=0; i<num_cores; i++) {
+                if(fscanf(rFile, "%d", &mapping[i]) < 0) {
+                    printf("File Reading Error: cannot parser the core id");
+                    return 0;
+                }    
+            }
+        }
+
+        fclose(rFile);
+        return 1;
+    }
+}
 
 int get_cpuid(int i)
 {
@@ -199,11 +233,11 @@ int main(int ac, char **av)
 		perror("sched_setaffinity\n");
 	}
 
-        int i=0;
+    int i=0;
 	int outputNum;
 	size_t totalFileSize = 0;
-        size_t size[MAX_NUM_OUTPUT];
-        size_t outlen[MAX_NUM_OUTPUT];
+    size_t size[MAX_NUM_OUTPUT];
+    size_t outlen[MAX_NUM_OUTPUT];
 	char *ibuff[MAX_NUM_OUTPUT], *obuff[MAX_NUM_OUTPUT];
 
 	pthread_t tid[MAX_THREAD_NUM];
@@ -211,7 +245,7 @@ int main(int ac, char **av)
 	cpu_set_t set;
 	args_t args[MAX_THREAD_NUM];
 
-        char * outputfileGroup[MAX_NUM_OUTPUT];
+    char * outputfileGroup[MAX_NUM_OUTPUT];
 	for(i=0; i<MAX_NUM_OUTPUT; i++) {
 		const char* snp = ".txt";
 		char NoOfFile[4];
@@ -222,6 +256,10 @@ int main(int ac, char **av)
 		strcat(outputfileGroup[i], NoOfFile);
 		strcat(outputfileGroup[i],snp);
 	}
+
+    if(setMapping(mapping)==0) {
+        printf("Setting mapping error. Using the default setting!\n");
+    }
 
 	// open input file
 	FILE * rFile = fopen(inputfile,"rb");
