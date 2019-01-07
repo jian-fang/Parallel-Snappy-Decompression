@@ -14,7 +14,7 @@
 #endif
 
 #ifndef MAX_NUM_INPUT
-#define MAX_NUM_INPUT 128
+#define MAX_NUM_INPUT 256
 #endif
 
 int main(int ac, char **av)

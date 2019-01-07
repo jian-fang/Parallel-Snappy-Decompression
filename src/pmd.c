@@ -18,7 +18,7 @@
 #endif
 
 #ifndef MAX_NUM_OUTPUT
-#define MAX_NUM_OUTPUT 128
+#define MAX_NUM_OUTPUT 256
 #endif
 
 #ifndef MAX_THREAD_NUM
