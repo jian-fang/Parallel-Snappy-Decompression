@@ -1,5 +1,7 @@
 CFLAGS ?= -Wall -g -O3 -DNDEBUG=1  -DSG=1 -fPIC -DCHAINOPTIMIZATION -DCHAINTHRESH=256
-LDFLAGS += -lpthread
+# for POWER, use -pthread, for Intel, use -lpthread
+LDFLAGS += -pthread
+# LDFLAGS += -lpthread
 # Remove -DSG=1 if you don't need scather-gather support
 # NDEBUG=1 is recommended for production
 
