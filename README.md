@@ -7,7 +7,9 @@ Two main changes are:
 copy position during the compression procedure. The modified compression algorithm
 is Snappy compatable. A threshold is added to decide whether the hash table can be
 updated.
+
 Changes of orignal files: snappy.c
+
 The optimized version can be switched off by turn of the CHAINTHRESH parameter during
 compile time.
 
