@@ -23,6 +23,11 @@ New files:
     pmd.c       : multi-thread version of muldec.c
     lock.c      : lock for multi-thread in different platform (especially for IBM POWER)
 
+The algorithm has been test in:
+1. Intel Xeon E5-2670 v2 processors
+2. IBM POWER 8
+3. IBM POWER 9
+
 Authors
 Jian Fang (fangjian.alpc@gmail.com)
 Jianyu Chen (chenjy0046@gmail.com)
