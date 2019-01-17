@@ -6,8 +6,7 @@ Two main changes are:
 1) Optimize the sequential dependency in the decompression by adding selection of
 copy position during the compression procedure. The modified compression algorithm
 is Snappy compatable. A threshold is added to decide whether the hash table can be
-updated.
-
+updated. \\
 Changes of orignal files: snappy.c
 
 The optimized version can be switched off by turn of the CHAINTHRESH parameter during
