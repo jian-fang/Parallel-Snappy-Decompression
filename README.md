@@ -2,6 +2,8 @@
 This is a modify Snappy compression/decompression algorithm from Google
 (https://github.com/andikleen/snappy-c).
 
+License of this work follows the License of Snappy ((https://github.com/andikleen/snappy-c)).
+
 Two main changes are:
 
 1) Optimize the sequential dependency in the decompression by adding selection of copy position during the compression procedure. The modified compression algorithm is Snappy compatable. A threshold is added to decide whether the hash table can be
