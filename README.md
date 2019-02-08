@@ -2,7 +2,7 @@
 This is a modify Snappy compression/decompression algorithm from Google
 (https://github.com/andikleen/snappy-c).
 
-License of this work follows the License of Snappy ((https://github.com/andikleen/snappy-c)).
+License of this work follows the License of Snappy (https://github.com/andikleen/snappy-c/blob/master/LICENSE).
 
 Two main changes are:
 
