@@ -1,7 +1,5 @@
-CFLAGS ?= -Wall -g -O3 -DNDEBUG=1  -DSG=1 -fPIC -DCHAINOPTIMIZATION -DCHAINTHRESH=256
-# for POWER, use -pthread, for Intel, use -lpthread
-LDFLAGS += -pthread
-# LDFLAGS += -lpthread
+CFLAGS ?= -Wall -g -O3 -DNDEBUG=1  -DSG=1 -fPIC -DCHAINOPTIMIZATION -DCHAINTHRESH=256 -DNOFILEWRITE
+LDFLAGS += -lpthread
 # Remove -DSG=1 if you don't need scather-gather support
 # NDEBUG=1 is recommended for production
 
@@ -12,12 +10,16 @@ LDFLAGS += -pthread
 # download it somewhere and point to it
 KDOC := /usr/src/linux/scripts/kernel-doc
 
-all: scmd verify sgverify libsnappyc.so.1 mulcom muldec pmd
+all: scmd verify sgverify libsnappyc.so.1 \
+	 mulcom muldec pmd
 
 snappy.o: snappy.c compat.h snappy-int.h
 
 scmd: scmd.o snappy.o map.o util.o
 
+com: com.o snappy.o map.o util.o
+
+dec: dec.o snappy.o map.o util.o
 
 mulcom: mulcom.o snappy.o map.o util.o
 
@@ -25,10 +27,10 @@ muldec: muldec.o snappy.o map.o util.o
 
 pmd: pmd.o snappy.o map.o util.o
 
-CLEAN := scmd.o mulcom.o muldec.o pmd.o snappy.o \
-	 scmd mulcom muldec pmd bench bench.o fuzzer.o \
-	 fuzzer map.o verify.o verify util.o sgverify \
-	 sgverify.o snappy.html snappy.man libsnappyc.so.1
+CLEAN := scmd.o com.o dec.o mulcom.o muldec.o pmd.o snappy.o \
+	 scmd com dec mulcom muldec pmd bench bench.o \
+	 fuzzer.o fuzzer map.o verify.o verify util.o \
+	 sgverify sgverify.o snappy.html snappy.man libsnappyc.so.1
 
 clean: 
 	rm -f ${CLEAN}
