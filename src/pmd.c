@@ -233,9 +233,15 @@ int main(int ac, char **av)
 		perror("sched_setaffinity\n");
 	}
 
+#ifdef CSNPFILE
+    int combinedFile=1; // 1 for .csnp file and 0 for .snp file
+#else
+    int combinedFile=0;
+#endif
     int i=0;
 	int outputNum;
 	size_t totalFileSize = 0;
+	size_t totalFileSize_o = 0;
     size_t size[MAX_NUM_OUTPUT];
     size_t outlen[MAX_NUM_OUTPUT];
 	char *ibuff[MAX_NUM_OUTPUT], *obuff[MAX_NUM_OUTPUT];
@@ -268,36 +274,63 @@ int main(int ac, char **av)
 		exit(1);
 	}
 
-	// read the meta data: the number of compressed files in the combined file
-	long rv = fread(&outputNum, sizeof(outputNum), 1, rFile);
-	if(rv!=1) {
-		printf("file reading error for the output file number!\n");
-		exit(1);
-	}
+    long rv;
+    // for *.csnp file
+    if(combinedFile==1) {
+	    // read the meta data: the number of compressed files in the combined file
+	    rv = fread(&outputNum, sizeof(outputNum), 1, rFile);
+	    if(rv!=1) {
+		    printf("file reading error for the output file number!\n");
+		    exit(1);
+	    }
 
-	// read the meta data: the size of the compressed files in the combined file
-	rv = fread(size, sizeof(size_t), outputNum, rFile);
-	if(rv!=outputNum) {
-		printf("file reading error for the compressed size of the output files!\n");
-		exit(1);
-	}
+	    // read the meta data: the size of the compressed files in the combined file
+    	rv = fread(size, sizeof(size_t), outputNum, rFile);
+    	if(rv!=outputNum) {
+	    	printf("file reading error for the compressed size of the output files!\n");
+		    exit(1);
+	    }
 
-	// read the file data into memory (buffer): ibuff
-	for(i=0; i<outputNum; i++) {
-		// allocate ibuff[i] for each file
-		ibuff[i] = malloc(size[i]);	
-		if(ibuff[i] == NULL) {
-			printf("memory allocation error for intput file buffers!\n");
-			exit(1);
-		}
-		// read the files into ibuff[i]
-		rv = fread(ibuff[i], sizeof(char), size[i], rFile);
-		if(rv!=size[i]) {
-			printf("file reading error for the file data!\n");	
-		}
-		totalFileSize += size[i];
-	}
+    	// read the file data into memory (buffer): ibuff
+	    for(i=0; i<outputNum; i++) {
+		    // allocate ibuff[i] for each file
+		    ibuff[i] = malloc(size[i]);	
+		    if(ibuff[i] == NULL) {
+			    printf("memory allocation error for intput file buffers!\n");
+		    	exit(1);
+		    }
+		    // read the files into ibuff[i]
+		    rv = fread(ibuff[i], sizeof(char), size[i], rFile);
+		    if(rv!=size[i]) {
+			    printf("file reading error for the file data!\n");	
+		    }
+		    totalFileSize += size[i];
+	    }
+    }
+    // for *.snp file
+    else {
+        outputNum = nthreads;
 
+	    // get the file size
+	    fseek(rFile, 0, SEEK_END);
+    	size_t size_tmp = ftell(rFile);
+	    rewind(rFile);
+	    printf("the file size is %ld\n",size_tmp);
+
+        for(i=0; i<outputNum; i++) {
+            size[i] = size_tmp;
+		    // allocate ibuff[i] for each file
+		    ibuff[i] = malloc(size[i]);	
+		    if(ibuff[i] == NULL) {
+			    printf("memory allocation error for intput file buffers!\n");
+		    	exit(1);
+		    }
+		    // read the files into ibuff[i]
+		    rv = fread(ibuff[i], sizeof(char), size[i], rFile);
+	        rewind(rFile);
+		    totalFileSize += size[i];
+        }
+    }
 
 #ifdef TIMINGINFO
 	struct timeval timer0, timer1, timer2;
@@ -309,6 +342,7 @@ int main(int ac, char **av)
 	for(i=0; i<outputNum; i++) {
 		// calculate the sizes of the output
 		int err = snappy_uncompressed_length(ibuff[i],size[i],&outlen[i]);
+		totalFileSize_o += outlen[i];
 		if(!err) {
 			printf("Snappy file length error!\n");
 		}
@@ -369,9 +403,11 @@ int main(int ac, char **av)
 	long runningtime = (timer2.tv_sec-timer1.tv_sec)*1000000L+timer2.tv_usec-timer1.tv_usec;
 	printf("Decompression time is %ld usec with allocation cost and %ld usec without\n", runningtimeAll, runningtime);
 	double throughputAll = (double)totalFileSize/runningtimeAll/1.024/1.024;
+	double throughputAll_o = (double)totalFileSize_o/runningtimeAll/1.024/1.024;
 	double throughput = (double)totalFileSize/runningtime/1.024/1.024;
-	printf("The throughput (with memory allocation) is:\t %f MB/s\n", throughputAll);
-	printf("The throughput (without memory allocation) is:\t %f MB/s\n", throughput);
+	double throughput_o = (double)totalFileSize_o/runningtime/1.024/1.024;
+	printf("The throughput (with memory allocation) is:\t %f MB/s (%f MB/s)\n", throughputAll, throughputAll_o);
+	printf("The throughput (without memory allocation) is:\t %f MB/s (%f MB/s)\n", throughput, throughput_o);
 #endif
 
 #ifndef NOFILEWRITE

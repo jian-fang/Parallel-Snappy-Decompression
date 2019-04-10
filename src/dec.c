@@ -94,6 +94,7 @@ int main(int ac, char **av)
 		exit(1);
 	}
 
+#ifndef NOFILEWRITE
 	// write the output file
 	FILE * wFile;
         wFile=fopen(outputfile,"wb");
@@ -102,9 +103,10 @@ int main(int ac, char **av)
 		printf("file writing error\n");
 		exit(1);
 	}
+	fclose(wFile);
+#endif
 
 	fclose(rFile);
-	fclose(wFile);
 
 	// free the memory allocation
 	free(ibuff);
