@@ -81,9 +81,11 @@ int main(int ac, char **av)
 	double runningtime = (timer2.tv_sec-timer1.tv_sec)*1000000L+timer2.tv_usec-timer1.tv_usec;
 	printf("Decompression time is %ld microsec\n",(timer2.tv_sec-timer1.tv_sec)*1000000L+timer2.tv_usec-timer1.tv_usec);
 	double throughputAll = (double)size/runningtimeAll/1.024/1.024;
+	double throughputAll_o = (double)outlen/runningtimeAll/1.024/1.024;
 	double throughput = (double)size/runningtime/1.024/1.024;
-	printf("The throughput (with memory allocation) is:\t %f MB/s\n", throughputAll);
-	printf("The throughput (without memory allocation) is:\t %f MB/s\n", throughput);
+	double throughput_o = (double)outlen/runningtime/1.024/1.024;
+	printf("The throughput (with memory allocation) is:\t %f MB/s (%f MB/s)\n", throughputAll, throughputAll_o);
+	printf("The throughput (without memory allocation) is:\t %f MB/s (%f MB/s)\n", throughput, throughput_o);
 #endif
 
 	// check whether error occurs
